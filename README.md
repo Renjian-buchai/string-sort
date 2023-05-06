@@ -39,3 +39,13 @@ I don't know, either.
 Flag `-T`:
 
 - Trims spaces after sorting
+
+Flag `-U`:
+
+- Converts string to uppercase
+- Cannot be used in conjuction with -L
+
+Flag `-L`:
+
+- Converts string to lowercase
+- Cannot be used in conjuction with -U
