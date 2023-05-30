@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
     return 0;
   }
 
-  if (flags & 0b0110'0000) {
+  if (!(flags & 0b0110'0000)) {
     std::cout
         << "Invalid argument. Cannot have both -U and -L flags at same time";
     return 1;
@@ -66,12 +66,12 @@ int main(int argc, char** argv) {
 
   if (flags & 0b0100'0000) {
     for (auto it = input_string.begin(); it != input_string.end(); ++it)
-      *it = 96 < *it && *it < 122 ? *it -= 32 : *it;
+      *it = 96 < *it && *it <= 122 ? *it -= 32 : *it;
   }
 
   if (flags & 0b0010'0000) {
     for (auto it = input_string.begin(); it != input_string.end(); ++it)
-      *it = 65 < *it && *it < 93 ? *it += 32 : *it;
+      *it = 65 <= *it && *it < 93 ? *it += 32 : *it;
   }
 
   std::sort(input_string.begin(), input_string.end());
