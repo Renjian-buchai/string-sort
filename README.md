@@ -49,3 +49,7 @@ Flag `-L`:
 
 - Converts string to lowercase
 - Cannot be used in conjuction with -U
+
+Flag `-H`:
+
+- Dumps documentation to command line
