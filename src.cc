@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
     return 0;
   }
 
-  if (!(flags & 0b0110'0000)) {
+  if ((flags & 0b0110'0000) == 0b0110'0000) {
     std::cout
         << "Invalid argument. Cannot have both -U and -L flags at same time";
     return 1;
