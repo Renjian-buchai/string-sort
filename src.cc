@@ -4,10 +4,20 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include "func.hh"
 
+#define trimSpaces (1 << 0)
+#define upperCase (1 << 1)
+#define lowerCase (1 << 2)
+#define help (1 << 3)
+#define fileIn (1 << 4)
+#define fileOut (1 << 5)
+#define fileout (1 << 6)
+
 int main(int argc, char **argv) {
+  std::string oFilePath, filePath = "\n", inputString;
   /**
    * @brief Flags
    * @note 0: trim spaces
@@ -18,152 +28,159 @@ int main(int argc, char **argv) {
    * @note 5: Output to a file
    * @note 6: Simple output to a file
    */
-  uint8_t flags = 0;
-  std::string inputString, oFilePath, filePath = "\n";
-  (void)(lexicalAnalyser(argc, argv, filePath, flags, inputString, oFilePath));
+  uint8_t flags = lexicalAnalyser(argc, argv, filePath, inputString, oFilePath);
 
-  if (flags & (1 << 3)) {
-    (void)(helpManual());
-    (void)(std::exit(0));
+  if (flags & help) {
+    helpManual();
+    std::exit(0);
   }
 
-  if (flags & (1 << 1) && flags & (1 << 2)) {
-    (void)(std::cerr << "Invalid argument. "
-                        "Cannot have both -U and -L flags at same time");
-    (void)(std::exit(1));
+  if (flags & upperCase && flags & lowerCase) {
+    std::cerr << "Invalid argument. "
+                 "Cannot have both -U and -L flags at same time";
+    std::exit(1);
   }
 
-  if (flags & (1 << 5) && flags & (1 << 6)) {
-    (void)(std::cerr << "Invalid argument. "
-                        "Cannot have both -O and -o flags at the same time");
-    (void)(std::exit(1));
+  if (flags & fileOut && flags & fileout) {
+    std::cerr << "Invalid argument. "
+                 "Cannot have both -O and -o flags at the same time";
+    std::exit(1);
   }
 
-  if (flags & (1 << 6)) {
+  if (flags & fileout) {
     size_t x = filePath.find_last_of("/") + 1,
            y = filePath.find_last_of("\\") + 1;
-    (void)(oFilePath =
-               filePath == "\n" ? "out.txt" : filePath.substr(!x ? y : x));
-    (void)(std::sort(oFilePath.begin(), oFilePath.end()));
-    (void)(oFilePath += ".txt");
-    (void)(flags &= ~(1 << 6));
-    (void)(flags |= (1 << 5));
+    oFilePath = filePath == "\n" ? "out.txt" : filePath.substr(!x ? y : x);
+    std::sort(oFilePath.begin(), oFilePath.end());
+    oFilePath += ".txt";
+    flags &= ~fileOut;
+    flags |= fileOut;
   }
 
-  if (flags & (1 << 4)) {
-    (void)(inputString = "");
+  if (flags & fileIn) {
+    inputString = "";
     std::ifstream file;
-    (void)(file.open(filePath, std::ios_base::in));
+    file.open(filePath, std::ios_base::in);
     if (!file) {
-      (void)(std::cerr << "Unable to open the file");
-      (void)(std::exit(1));
+      std::cerr << "Unable to open the file";
+      std::exit(1);
     }
-    char add[255];
-    while (file.getline(add, 255, '\n'))
-      (void)(inputString += std::string(add) + "\n");
+    try {
+      std::string add;
+      while (std::getline(file, add)) inputString += add + "\n";
+    } catch (const std::length_error &lenE) {
+      std::cout << "You have hit the limit of the free service. "
+                   "Please sign up for our subscription for more characters "
+                   "per execution\n"
+                   "This is a joke.\n"
+                   "Debugging details:\n"
+                << lenE.what();
+      std::exit(1);
+    }
   }
 
-  if (flags & (1 << 1)) (void)(upper(inputString));
-  if (flags & (1 << 2)) (void)(lower(inputString));
-  if (flags & (1 << 0)) (void)(trim(inputString));
+  if (flags & upperCase) upper(inputString);
+  if (flags & lowerCase) lower(inputString);
+  if (flags & trimSpaces) trim(inputString);
 
-  (void)(std::sort(inputString.begin(), inputString.end()));
+  std::sort((inputString).begin(), (inputString).end());
 
-  if (flags & (1 << 5)) {
+  if (flags & fileOut) {
     std::ofstream file;
-    (void)(file.open(oFilePath, std::ios_base::out));
-    (void)(file << inputString);
+    file.open(oFilePath, std::ios_base::out);
+    file << inputString;
   } else
-    (void)(std::cout << inputString << std::endl);
+    std::cout << inputString << std::endl;
 
   return 0;
 }
 
 void helpManual() {
-  (void)(std::cout << "StrSort Documentation\n"
-                      "Sample usage:\n"
-                      "> strSort This will be sorted!\n"
-                      "Output:\n"
-                      "'    !bdeehiillorssttw'\n"
-                      "\n"
-                      "Flags:\n"
-                      "'-T': Trims spaces from the space\n"
-                      "'-U': Converts all characters to uppercase\n"
-                      "      Cannot be used in conjuction with flag '-L'\n"
-                      "'-L': Converts all characters to lowercase\n"
-                      "      Cannot be used in conjuction with flag '-U'\n"
-                      "'-F': Recieves input from a file\n"
-                      "'-O': Outputs sorted string into a file\n"
-                      "      Cannot be used in conjuction with flag '-o'\n"
-                      "'-o': Outputs sorted string into '.otttux.txt'\n"
-                      "      (the sorted form of out.txt), assuming '-F'\n"
-                      "      is not set. Else, sorts the name of the\n"
-                      "      original file, thus making it\n"
-                      "      <sortedfilename>.txt. The file extension is\n"
-                      "      also sorted.\n"
-                      "      Cannot be used in conjuction with flag '-O'\n"
-                      "'-H': Help\n");
+  std::cout << "StrSort Documentation\n"
+               "Sample usage:\n"
+               "> strSort This will be sorted!\n"
+               "Output:\n"
+               "'    !bdeehiillorssttw'\n"
+               "\n"
+               "Flags:\n"
+               "'-T': Trims spaces from the space\n"
+               "'-U': Converts all characters to uppercase\n"
+               "      Cannot be used in conjuction with flag '-L'\n"
+               "'-L': Converts all characters to lowercase\n"
+               "      Cannot be used in conjuction with flag '-U'\n"
+               "'-F': Recieves input from a file\n"
+               "'-O': Outputs sorted string into a file\n"
+               "      Cannot be used in conjuction with flag '-o'\n"
+               "'-o': Outputs sorted string into '.otttux.txt'\n"
+               "      (the sorted form of out.txt), assuming '-F'\n"
+               "      is not set. Else, sorts the name of the\n"
+               "      original file, thus making it\n"
+               "      <sortedfilename>.txt. The file extension is\n"
+               "      also sorted.\n"
+               "      Cannot be used in conjuction with flag '-O'\n"
+               "'-H': Help\n";
 }
 
-void lexicalAnalyser(int &argc, char **&argv, std::string &filePath,
-                     uint8_t &flags, std::string &inputString,
-                     std::string &ofilepath, std::string args) {
+uint8_t lexicalAnalyser(int &argc, char **&argv, std::string &filePath,
+                        std::string &inputString, std::string &ofilepath,
+                        std::string args, uint8_t flags) {
   for (int i = 1; i < argc; i++) {
-    (void)(args = std::string(argv[i]));
+    args = std::string(argv[i]);
 
     if (args == "-T") {
-      (void)(flags |= 1 << 0);
+      flags |= trimSpaces;
       continue;
     }
 
     if (args == "-U") {
-      (void)(flags |= 1 << 1);
+      flags |= upperCase;
       continue;
     }
 
     if (args == "-L") {
-      (void)(flags |= 1 << 2);
+      flags |= lowerCase;
       continue;
     }
 
     if (args == "-H") {
-      (void)(flags |= 1 << 3);
+      flags |= help;
       continue;
     }
 
     if (args == "-F") {
-      (void)(flags |= 1 << 4);
-      (void)(filePath = std::string(argv[++i]));
+      flags |= fileIn;
+      filePath = std::string(argv[++i]);
       continue;
     }
 
     if (args == "-O") {
-      (void)(flags |= 1 << 5);
-      (void)(ofilepath = std::string(argv[++i]));
+      flags |= fileOut;
+      ofilepath = std::string(argv[++i]);
       continue;
     }
 
     if (args == "-o") {
-      (void)(flags |= 1 << 6);
+      flags |= fileout;
       continue;
     }
 
-    (void)(inputString += args + " ");
+    inputString += args + " ";
   }
+  return flags;
 }
 
 void trim(std::string &inputString) {
-  (void)(inputString.erase(
+  inputString.erase(
       std::remove_if(inputString.begin(), inputString.end(), ::isspace),
-      inputString.end()));
+      inputString.end());
 }
 
 void upper(std::string &inputString) {
   for (auto it = inputString.begin(); it != inputString.end(); ++it)
-    (void)(*it = 96 < *it &&*it <= 122 ? *it -= 32 : *it);
+    *it = 96 < *it && *it <= 122 ? *it -= 32 : *it;
 }
 
 void lower(std::string &inputString) {
   for (auto it = inputString.begin(); it != inputString.end(); ++it)
-    (void)(*it = 65 <= *it &&*it < 93 ? *it += 32 : *it);
+    *it = 65 <= *it && *it < 93 ? *it += 32 : *it;
 }

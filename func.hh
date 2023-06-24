@@ -2,8 +2,9 @@
 #define STRSORT_FUNC_HH
 
 void helpManual();
-void lexicalAnalyser(int &, char **&, std::string &, uint8_t &, std::string &,
-                     std::string &, std::string args = "");
+uint8_t lexicalAnalyser(int &, char **&, std::string &, std::string &,
+                        std::string &, std::string args = "",
+                        uint8_t flags = 0);
 void trim(std::string &);
 void upper(std::string &);
 void lower(std::string &);
