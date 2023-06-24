@@ -43,12 +43,28 @@ Flag `-T`:
 Flag `-U`:
 
 - Converts string to uppercase
-- Cannot be used in conjuction with -L
+- Cannot be used in conjuction with `-L`
 
 Flag `-L`:
 
 - Converts string to lowercase
-- Cannot be used in conjuction with -U
+- Cannot be used in conjuction with `-U`
+
+Flag `-F`:
+
+- Takes an input from the file specified by the file path following this flag
+
+Flag `-O`:
+
+- Outputs input to file specified following this flag
+- Cannot be used in conjuction with `-o`
+
+Flag `-o`:
+
+- Outputs input to file:
+  - `.otttux.txt` if no input file is specified
+  - `<sorted filename>.txt` if an input file is specified. The file extension is also sorted.
+- Cannot be used in conjuction with `-O`
 
 Flag `-H`:
 
